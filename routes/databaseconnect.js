@@ -10,9 +10,53 @@ var connection = mysql.createConnection({
 });
 
 connection.connect(function(err) {
-    if (err) return callback(err);
+    if (err){
+        throw err;
+    }
+
 
 });
+function logerrors(jsonArray, id,callback) {
+   var sql = "INSERT INTO errors (student_id, timestamp, class_origin, function_origin, error_message, severity) VALUES ?"
+    var values = []
+    for (var i = 0; i < jsonArray.length; i++) {
+        var value = [id, jsonArray[i]['timestamp'], jsonArray[i]['class'], jsonArray[i]['method'], jsonArray[i]['message'], jsonArray[i]['severity']]
+        values.push(value)
+    }
+    connection.query(sql, [values], function (err, result) {
+        if (err) {
+
+            return callback({"success": false})
+        } else {
+
+            return callback({"success": true})
+        }
+    })
+}
+
+function allerrors(callback){
+    var sql ="SELECT * FROM errors";
+
+    connection.query(sql, function (err, result, fields) {
+        if (err){
+            throw err;
+        }else {
+            return callback(result)
+        }
+    })
+}
+
+function allusers(callback) {
+    var sql ="SELECT * FROM students";
+
+    connection.query(sql, function (err, result, fields) {
+        if (err){
+            throw err;
+        }else {
+            return callback(result)
+        }
+    })
+}
 
 function setup_user(student_id,program,mode,year,semester,level,courses, callback) {
     /*TODO::
@@ -25,7 +69,7 @@ function setup_user(student_id,program,mode,year,semester,level,courses, callbac
     
     connection.query(sql, function (err,result) {
 
-            if(!err){
+            if(err==null){
             //    no error
                 console.log("1calling this one")
                 sql = "DELETE FROM courses_taken WHERE student_id = '" + student_id + "'";
@@ -53,54 +97,58 @@ function setup_user(student_id,program,mode,year,semester,level,courses, callbac
 
 
                 })
-            }
-            if (err.errno === 1062) {
-                //    user exists update
-                console.log("calling this one")
-                var fields = [program, mode, year, semester, level, student_id];
-                sql = 'UPDATE students SET program = ?, mode =?, year =?, semester =?, level =? WHERE student_id=?';
-                connection.query(sql, fields, function (err, result) {
-                    if (err) {
-                        //    callback
-                        console.log("here222",err.message)
-                        return callback({"success": false})
-                    }
-                    //    add courses to courses taken table but first delete those currently there
-                    sql = "DELETE FROM courses_taken WHERE student_id = '" + student_id + "'";
-                    connection.query(sql, function (err, result) {
+            }else {
+                if (err.errno === 1062) {
+                    //    user exists update
+                    console.log("calling this one")
+                    var fields = [program, mode, year, semester, level, student_id];
+                    sql = 'UPDATE students SET program = ?, mode =?, year =?, semester =?, level =? WHERE student_id=?';
+                    connection.query(sql, fields, function (err, result) {
                         if (err) {
-                            console.log("here0022")
+                            //    callback
+                            console.log("here222", err.message)
                             return callback({"success": false})
                         }
-                        console.log("reached here")
-                        //    successfully deleted..now add rows
-                        sql = "INSERT INTO courses_taken (student_id, course_code) VALUES ?"
-                        var values = []
-                        for (var i = 0; i < courses.length; i++) {
-                            var value = [student_id, courses[i]]
-                            values.push(value)
-                        }
-                        console.log("done for loop")
-                        connection.query(sql,[values],function (err, result) {
-                            if(err){
-                                console.log("progress")
-                                return callback({"success":false})
-                            }else {
-                                console.log("lets play")
-                                return callback({"success":true})
+                        //    add courses to courses taken table but first delete those currently there
+                        sql = "DELETE FROM courses_taken WHERE student_id = '" + student_id + "'";
+                        connection.query(sql, function (err, result) {
+                            if (err) {
+                                console.log("here0022")
+                                return callback({"success": false})
                             }
+                            console.log("reached here")
+                            //    successfully deleted..now add rows
+                            sql = "INSERT INTO courses_taken (student_id, course_code) VALUES ?"
+                            var values = []
+                            for (var i = 0; i < courses.length; i++) {
+                                var value = [student_id, courses[i]]
+                                values.push(value)
+                            }
+
+                            connection.query(sql, [values], function (err, result) {
+                                if (err) {
+                                    console.log("progress")
+                                    return callback({"success": false})
+                                } else {
+                                    console.log("lets play")
+                                    return callback({"success": true})
+                                }
+                            })
+
                         })
 
                     })
-
-                })
-            }else {
-                console.log("anotherone")
+                } else {
+                    console.log("anotherone")
+                }
             }
 
         })
 }
 
 module.exports={
-    setup:setup_user
+    setup:setup_user,
+    all_students:allusers,
+    all_errors:allerrors,
+    log_errors:logerrors
 }

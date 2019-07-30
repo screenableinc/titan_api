@@ -8,19 +8,22 @@ var app = require('../app');
 var debug = require('debug')('classmate:server');
 var http = require('http');
 
+
 /**
  * Get port from environment and store in Express.
  */
 
 var port = normalizePort(process.env.PORT || '3000');
 app.set('port', port);
-app.listen(port,"192.168.43.128")
+app.listen(port,"192.168.10.101")
 
 /**
  * Create HTTP server.
  */
 
 var server = http.createServer(app);
+
+io = require('socket.io').listen(server);
 
 /**
  * Listen on provided port, on all network interfaces.
