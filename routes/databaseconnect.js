@@ -16,6 +16,33 @@ connection.connect(function(err) {
 
 
 });
+
+function getAppversion(callback){
+    var sql = "SELECT mobile_app_version, fixes FROM version_control"
+    connection.query(sql, function (err, result, fields) {
+        if (err){
+            return callback({status:505,message:err})
+        }else {
+            return callback({status:200,result:result[0]})
+        }
+
+    });
+}
+
+function setAppversion(version,fixes,callback){
+    var fields = [version,fixes];
+    sql = "UPDATE version_control SET mobile_app_version = ?, fixes =? WHERE _id='app_version'";
+    connection.query(sql, function (err, result, fields) {
+        if (err){
+            return callback({status:505,message:err})
+        }else {
+            return callback({status:200,result:result})
+        }
+
+    });
+}
+
+
 function logerrors(jsonArray, id,callback) {
    var sql = "INSERT INTO errors (student_id, timestamp, class_origin, function_origin, error_message, severity) VALUES ?"
     var values = []
@@ -149,6 +176,8 @@ function setup_user(student_id,program,mode,year,semester,level,courses, callbac
 module.exports={
     setup:setup_user,
     all_students:allusers,
+    getAppVersion:getAppversion,
+    setAppVersion:setAppversion,
     all_errors:allerrors,
     log_errors:logerrors
 }

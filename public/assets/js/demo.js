@@ -204,6 +204,7 @@ function g(array,value){
 		n++;
 		i = array.indexOf(value, i+1);
 	} while (i >= 0  );
+	console.log(value)
 
 	return n;
 }
