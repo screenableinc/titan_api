@@ -9,7 +9,7 @@
     "@coreui/coreui": "^2.1.12",
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
-    "express": "^4.16.4",
+    "express": "^4.18.2",
     "firebase-admin": "^8.2.0",
     "gentelella": "^1.4.0",
     "handlebars": ">=4.3.0",
