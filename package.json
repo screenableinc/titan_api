@@ -10,7 +10,7 @@
     "cookie-parser": "~1.4.4",
     "debug": "~2.6.9",
     "express": "^4.16.4",
-    "firebase-admin": "^8.2.0",
+    "firebase-admin": "^11.4.1",
     "gentelella": "^1.4.0",
     "handlebars": ">=4.3.0",
     "http-errors": "~1.6.3",
